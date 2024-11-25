@@ -1,8 +1,8 @@
-# meta_analysis_auc_bayes.R
+# meta_analysis_pilot.R
 # run a Bayesian meta-analysis of AUC studies
 # August 2024
 
-# 
+# load libraries
 library(dplyr)
 library(nimble)
 library(metamisc) # for EuroSCORE data
@@ -17,6 +17,8 @@ plot(fit)
 # check variance against sample size
 plot(log2(EuroSCORE$n), fit$data$theta.se)
 median(EuroSCORE$n) # median study size
+
+
 
 ### part 2: run in nimble ###
 ## code; copied from metamisc, bugsmodels.r
@@ -75,3 +77,11 @@ mcmc_out <- nimbleMCMC(model = model,
 mcmc_out$summary$all.chains
 hist(mcmc_out$samples$chain1[,1])
 hist(mcmc_out$samples$chain1[,2])
+
+
+
+### part 3: run the nimble meta-analysis on data from the streptokinsane study
+# data is extracted from streptokinase_meta_analysis_data_wrangle.R file
+
+# load in the data
+strep_df <- read.csv(file = "02_data/formatted_meta_analysis_odds_ratio.csv")
