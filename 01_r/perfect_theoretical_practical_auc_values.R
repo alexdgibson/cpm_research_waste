@@ -1,6 +1,6 @@
-
-# 2024-08-22
+# perfect_theoretical_practical_auc_values.R
 # graphing potential AUC values for perfect prediction, theoretical, and practical
+# August 2024
 
 # load libraries
 library(tidyverse)
