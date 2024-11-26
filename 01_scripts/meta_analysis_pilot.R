@@ -74,14 +74,23 @@ mcmc_out <- nimbleMCMC(model = model,
             summary = TRUE, 
             setSeed = seeds,
             WAIC = FALSE)
+# view the summary of all chains
 mcmc_out$summary$all.chains
+
+# view the summary of a single chain
 hist(mcmc_out$samples$chain1[,1])
 hist(mcmc_out$samples$chain1[,2])
 
 
+### Part 3: create as a cumulative meta-analysis
+# iterate a new model for each additional study
+# save the output of each model
 
-### part 3: run the nimble meta-analysis on data from the streptokinsane study
-# data is extracted from streptokinase_meta_analysis_data_wrangle.R file
 
-# load in the data
-strep_df <- read.csv(file = "02_data/formatted_meta_analysis_odds_ratio.csv")
+
+
+
+
+
+
+
