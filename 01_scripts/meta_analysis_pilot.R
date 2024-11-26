@@ -9,15 +9,17 @@ library(metamisc) # for EuroSCORE data
 
 ### part 1: run the standard meta-analysis as a comparison ###
 data(EuroSCORE)
+
 # Meta-analysis of the c-statistic (random effects)
 fit <- valmeta(cstat = c.index, cstat.se = se.c.index, cstat.cilb = c.index.95CIl,
         cstat.ciub = c.index.95CIu, cstat.cilv = 0.95, N = n, O = n.events,
         slab = Study, data = EuroSCORE)
+
 plot(fit)
+
 # check variance against sample size
 plot(log2(EuroSCORE$n), fit$data$theta.se)
 median(EuroSCORE$n) # median study size
-
 
 
 ### part 2: run in nimble ###
@@ -85,12 +87,6 @@ hist(mcmc_out$samples$chain1[,2])
 ### Part 3: create as a cumulative meta-analysis
 # iterate a new model for each additional study
 # save the output of each model
-
-
-
-
-
-
 
 
 
