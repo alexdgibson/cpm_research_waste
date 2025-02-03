@@ -256,7 +256,7 @@ code_cal <- nimbleCode({
   bsTau ~ T(dt(0, (1.5^2), df = 3), 0, 10) # truncated, see paper for prior set-up
   mu.tobs ~ dnorm(0, 1/1000) # overall mean
   pred.tobs ~ dnorm(mu.tobs, bsprec) # prediction interval
-  # back-transform from natutal log
+  # back-transform from natural log
   log(mu.oe) <- mu.tobs
   log(pred.oe) <- pred.tobs
   bsprec <- 1/(bsTau*bsTau) # transform SD to precision
@@ -446,10 +446,13 @@ funnel_discr <- EuroSCORE %>% fat(b = b_discr,
                                   b.se = b_se_discr,
                                   n.total = n_total_discr,
                                   d.total = n_total_discr,
-                                  method = "E-FIV")
+                                  method = "D-FIV")
 
 # plot the funnel plot for the discrimination
-plot(funnel_discr)
+plot(x = funnel_discr,
+     ref = 0.5,
+     xlab = "C-Statistic")
+
 
 
 # create the objects needed for the fat function
@@ -463,12 +466,12 @@ funnel_cal <- EuroSCORE %>% fat(b = b_cal,
                                 b.se = b_se_cal,
                                 n.total = n_total_cal,
                                 d.total = d_total_cal,
-                                method = "E-FIV")
+                                method = "M-FIV")
 
 # plot the funnel plot for the calibration
-plot(funnel_cal)
-
-
+plot(x = funnel_cal,
+     ref = 1,
+     xlab = "Calibration (O:E)")
 
 
 
