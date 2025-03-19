@@ -228,6 +228,24 @@ ggsave(filename = "03_figures/cumulative_meta_discr_dash_zero.jpg",
        height = 4)
 
 
+### Part 2c: create a recursive cumulative meta-analysis plot ###
+# Take the data from the meta-analysis and calculate the recursive data
+# Plot into a graph
+cum_discr_forest_plot %>% 
+  mutate(recursive = (Mean-lag(Mean)),
+         step = 1:23) %>% 
+  ggplot(aes(x = step, y = recursive))+
+  geom_line(linewidth = 1)+
+  theme_classic()+
+  labs(x = "Each New Study",
+       y = "Change in Summary Estimate")+
+  geom_hline(aes(yintercept = 0.0), linetype = "longdash")
+
+# save the graph
+ggsave(filename = "03_figures/recursive_cumulative_meta_discr_dash_zero.jpg",
+       width = 6,
+       height = 4)
+
 
 
 ### Part 3a: create the model for the calibration ###
@@ -430,6 +448,34 @@ cum_cal_plot %>%
 ggsave(filename = "03_figures/cumulative_meta_cal_dash_one.jpg",
        width = 6,
        height = 4)
+
+
+
+
+
+
+### Part 3c: create a recursive cumulative meta-analysis plot ###
+# Take the data from the meta-analysis and calculate the recursive data
+# Plot into a graph
+cum_cal_plot %>% 
+  mutate(recursive = (Mean-lag(Mean))/lag(Mean),
+         step = 1:23) %>% 
+  ggplot(aes(x = step, y = recursive))+
+  geom_line(linewidth = 1)+
+  theme_classic()+
+  labs(x = "Each New Study",
+       y = "Relative Change in Calibration")+
+  geom_hline(aes(yintercept = 0.0), linetype = "longdash")
+
+# save the graph
+ggsave(filename = "03_figures/recursive_cumulative_meta_cal_dash_zero.jpg",
+       width = 6,
+       height = 4)
+
+
+
+
+
 
 
 ### Part 4 create a funnel plot for the discrimination and calibration ###
@@ -713,18 +759,24 @@ for (i in 1:((1 - round(mcmc_out_discr$summary$all.chains[2], digits = 2)) * 100
 discr_imp_sim_samp <- list(100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200)
 
 # join the c-stat an the standard error together
-discr_combined <- data.frame(expand.grid(auc = discr_imp_sim, sample = discr_imp_sim_samp))
+# also where the AUC value is 1.0 change it to 0.99999 as 1.0 goes to infinity
+discr_combined <- data.frame(expand.grid(auc = discr_imp_sim, sample = discr_imp_sim_samp)) %>%
+  mutate(auc = ifelse(auc == 1.0, 0.99999, auc))
 
 
 # simulate standard errors from the different samples sizes
 # formula from Newcombe 2005 to estimate standard error of the c-statistic
 
+# average observed events
+euro_observed <- mean(EuroSCORE$Po)
+euro_non_observed <- 1-discr_observed
+
 sim_data <- discr_combined %>% mutate(
   cstat = as.numeric(auc),
   theta = logit(cstat),
   sample = as.numeric(sample),
-  n = sample*0.05, # 0.1 for 10% observed events
-  m = sample*0.95, # 0.9 for 90% non-observed events
+  n = sample*euro_observed, # using the average observed events from all the studies in the meta-analysis
+  m = sample*euro_non_observed, # using the average non-observed events from all the studies in the meta-analysis
   star = (0.5*sample)-1,
   logit.se.c = sqrt(((1+star)*((1-cstat)/(2-cstat))+((star*cstat)/(1+cstat)))/(n*m*cstat*(1-cstat)))
 ) %>% select(
@@ -920,7 +972,7 @@ cal_combined <- data.frame(expand.grid(o.e = cal_imp_sim, sample = cal_imp_sim_s
 sim_data_cal <- cal_combined %>% mutate(
   o.e = as.numeric(o.e),
   n = as.numeric(sample),
-  o = n * 0.05, # this is 5% observed | same as the observed discrimination
+  o = n * euro_observed, # made as the average obsered number of events as the data set simulated from
   e = o / o.e,
   theta = log(o/e), # observed:expected ratio on the log scale
   theta.se = sqrt((1-(o/n))/o)) %>% select( # log o:e standard error
